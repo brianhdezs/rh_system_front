@@ -1,7 +1,7 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Login from "./components/login/Login";
+import Login from "./components/register/Login";
 import Dashboard from "./components/dashboard/Dashboard";
 
 function App() {
