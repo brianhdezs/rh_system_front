@@ -1,4 +1,14 @@
-export default function Login() {
+interface LoginProps {
+  onLogin: () => void;
+}
+
+export default function Login({ onLogin }: LoginProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Navegar al dashboard
+    onLogin();
+  };
+
   return (
     <>
       <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
@@ -14,7 +24,7 @@ export default function Login() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
