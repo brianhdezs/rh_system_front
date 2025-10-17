@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AdminHeader } from "../components/AdminHeader";
 import { AdminSidebar } from "../components/AdminSidebar";
-import { Outlet } from "react-router";
+import { DashboardPage } from "../../pages/DashboardPage";
 
 const AdminLayout = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -17,10 +17,11 @@ const AdminLayout = () => {
         <AdminHeader />
 
         <main className="flex-1 p-6">
-          <Outlet />
+          <DashboardPage />
         </main>
       </div>
     </div>
   );
 };
+
 export default AdminLayout;

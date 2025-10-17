@@ -1,21 +1,44 @@
-import { StrictMode, useState } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Login from "./components/register/Login";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
 import AdminDashboard from "./admin/layouts/AdminLayout";
+import { useState } from "react";
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+function AppContent() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
+  // Mostrar un loading mientras se verifica la autenticación
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
-  if (isLoggedIn) {
+  // Si está autenticado, mostrar el dashboard
+  if (isAuthenticated) {
     return <AdminDashboard />;
   }
 
-  return <Login onLogin={handleLogin} />;
+  // Si no está autenticado, mostrar login o registro
+  return showRegister ? (
+    <Register onNavigateToLogin={() => setShowRegister(false)} />
+  ) : (
+    <Login onNavigateToRegister={() => setShowRegister(true)} />
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
 
 createRoot(document.getElementById("root")!).render(
