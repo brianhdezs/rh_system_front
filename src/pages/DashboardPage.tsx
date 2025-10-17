@@ -1,13 +1,6 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
-import {
-  Users,
-  Calendar,
-  Briefcase,
-  FileText,
-  Clock,
-  TrendingUp,
-} from "lucide-react";
+import { Users, Calendar, Briefcase, FileText, Clock } from "lucide-react";
 import StatCard from "../admin/components/StatCard";
 import QuickActions from "../admin/components/QuickActions";
 import ActivityFeed from "../admin/components/ActivityFeed";

@@ -1,4 +1,4 @@
-import type { LoginRequest, RegisterRequest, AuthResponse, ErrorResponse } from '../types/AuthTypes';
+import type { LoginRequest, RegisterRequest, AuthResponse } from '../types/AuthTypes';
 
 const API_BASE_URL = 'https://hrms-gateway-production.up.railway.app/gateway/auth';
 
