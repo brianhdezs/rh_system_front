@@ -81,7 +81,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
               currentPage === item.page ||
               (currentPage.includes("employee") && item.page === "employees") ||
               (currentPage.includes("performance") &&
-                item.page === "performance"); // ← NUEVO
+                item.page === "performance") ||
+              (currentPage.includes("attendance") &&
+                item.page === "attendance");
             return (
               <li key={index}>
                 <button

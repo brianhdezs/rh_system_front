@@ -10,6 +10,10 @@ import PerformanceCyclesPage from "../../pages/performance/PerformanceCyclesPage
 import CreateEvaluationPage from "../../pages/performance/CreateEvaluationPage";
 import EvaluationFormPage from "../../pages/performance/EvaluationFormPage";
 import type { Employee } from "../../types/EmployeeTypes";
+import AttendanceClockPage from "../../pages/attendance/AttendanceClockPage";
+import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
+import AttendanceDailyPage from "../../pages/attendance/AttendanceDailyPage";
+import AttendanceMainPage from "../../pages/attendance/AttendanceMainPage";
 
 type Page =
   | "dashboard"
@@ -21,6 +25,9 @@ type Page =
   | "performance-create"
   | "performance-form"
   | "attendance"
+  | "attendance-clock"
+  | "attendance-history"
+  | "attendance-daily"
   | "departments"
   | "reports"
   | "notifications"
@@ -119,6 +126,22 @@ const AdminLayout = () => {
 
       // Páginas placeholder para los otros módulos
       case "attendance":
+        return (
+          <AttendanceMainPage
+            onNavigateToClock={() => setCurrentPage("attendance-clock")}
+            onNavigateToHistory={() => setCurrentPage("attendance-history")}
+            onNavigateToDaily={() => setCurrentPage("attendance-daily")}
+          />
+        );
+
+      case "attendance-clock":
+        return <AttendanceClockPage />;
+
+      case "attendance-history":
+        return <AttendanceHistoryPage />;
+
+      case "attendance-daily":
+        return <AttendanceDailyPage />;
       case "departments":
       case "reports":
       case "notifications":
