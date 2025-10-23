@@ -33,6 +33,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { icon: Home, label: "Dashboard", page: "dashboard" },
     { icon: Users, label: "Empleados", page: "employees" },
+    { icon: BarChart3, label: "Evaluaciones", page: "performance" },
     { icon: Calendar, label: "Asistencias", page: "attendance" },
     { icon: Briefcase, label: "Departamentos", page: "departments" },
     { icon: BarChart3, label: "Reportes", page: "reports" },
@@ -78,7 +79,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
             const Icon = item.icon;
             const isActive =
               currentPage === item.page ||
-              (currentPage.includes("employee") && item.page === "employees");
+              (currentPage.includes("employee") && item.page === "employees") ||
+              (currentPage.includes("performance") &&
+                item.page === "performance"); // ← NUEVO
             return (
               <li key={index}>
                 <button
