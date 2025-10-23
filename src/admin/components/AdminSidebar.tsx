@@ -18,24 +18,28 @@ import { useAuth } from "../../context/AuthContext";
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  currentPage: string;
+  onNavigate: (page: string) => void;
 }
 
 export const AdminSidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggle,
+  currentPage,
+  onNavigate,
 }) => {
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { icon: Home, label: "Dashboard", active: true },
-    { icon: Users, label: "Empleados" },
-    { icon: Calendar, label: "Asistencias" },
-    { icon: Briefcase, label: "Departamentos" },
-    { icon: BarChart3, label: "Reportes" },
-    { icon: FileText, label: "Documentos" },
-    { icon: Bell, label: "Notificaciones" },
-    { icon: Settings, label: "Configuración" },
-    { icon: HelpCircle, label: "Ayuda" },
+    { icon: Home, label: "Dashboard", page: "dashboard" },
+    { icon: Users, label: "Empleados", page: "employees" },
+    { icon: Calendar, label: "Asistencias", page: "attendance" },
+    { icon: Briefcase, label: "Departamentos", page: "departments" },
+    { icon: BarChart3, label: "Reportes", page: "reports" },
+    { icon: FileText, label: "Documentos", page: "documents" },
+    { icon: Bell, label: "Notificaciones", page: "notifications" },
+    { icon: Settings, label: "Configuración", page: "settings" },
+    { icon: HelpCircle, label: "Ayuda", page: "help" },
   ];
 
   const getInitials = (fullName: string) => {
@@ -72,12 +76,15 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         <ul className="space-y-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
+            const isActive =
+              currentPage === item.page ||
+              (currentPage.includes("employee") && item.page === "employees");
             return (
               <li key={index}>
-                <a
-                  href="#"
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
-                    item.active
+                <button
+                  onClick={() => onNavigate(item.page)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                    isActive
                       ? "bg-indigo-50 text-indigo-600 border-r-2 border-indigo-600"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
@@ -87,7 +94,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                   {!isCollapsed && (
                     <span className="font-medium">{item.label}</span>
                   )}
-                </a>
+                </button>
               </li>
             );
           })}

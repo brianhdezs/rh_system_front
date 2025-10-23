@@ -1,16 +1,25 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
-import { Users, Calendar, Briefcase, FileText, Clock } from "lucide-react";
+import {
+  Users,
+  Calendar,
+  Briefcase,
+  FileText,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 import StatCard from "../admin/components/StatCard";
 import QuickActions from "../admin/components/QuickActions";
 import ActivityFeed from "../admin/components/ActivityFeed";
-import ChartComponent from "../admin/components/Chart";
-const Chart = ChartComponent as React.ComponentType<{
-  title: string;
-  data: any[];
-}>;
+import Chart from "../admin/components/Chart";
 
-export const DashboardPage: React.FC = () => {
+interface DashboardPageProps {
+  onNavigateToEmployees: () => void;
+}
+
+export const DashboardPage: React.FC<DashboardPageProps> = ({
+  onNavigateToEmployees,
+}) => {
   const { user } = useAuth();
 
   // Datos temporales - reemplazar con datos de tu API
@@ -78,7 +87,13 @@ export const DashboardPage: React.FC = () => {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {quickStats.map((stat, index) => (
-          <StatCard key={index} {...stat} />
+          <div
+            key={index}
+            onClick={index === 0 ? onNavigateToEmployees : undefined}
+            className={index === 0 ? "cursor-pointer" : ""}
+          >
+            <StatCard {...stat} />
+          </div>
         ))}
       </div>
 
@@ -92,7 +107,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <QuickActions />
+          <QuickActions onNavigateToEmployees={onNavigateToEmployees} />
           <ActivityFeed />
         </div>
       </div>
@@ -136,11 +151,14 @@ export const DashboardPage: React.FC = () => {
             Próximos Pasos
           </h2>
           <div className="space-y-3">
-            <div className="flex items-start space-x-3 p-3 bg-indigo-50 rounded-lg">
+            <button
+              onClick={onNavigateToEmployees}
+              className="w-full flex items-start space-x-3 p-3 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors text-left"
+            >
               <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
                 1
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
                   Agregar empleados
                 </p>
@@ -148,7 +166,8 @@ export const DashboardPage: React.FC = () => {
                   Comienza registrando a tu equipo
                 </p>
               </div>
-            </div>
+              <ArrowRight size={20} className="text-indigo-600 mt-1" />
+            </button>
             <div className="flex items-start space-x-3 p-3 bg-purple-50 rounded-lg">
               <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
                 2
