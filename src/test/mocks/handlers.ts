@@ -150,9 +150,7 @@ export const handlers = [
   }),
 
   // Attendance - Check In
-  http.post(`${API_BASE_URL}/gateway/timeclock/entry`, async ({ request }) => {
-    const body = await request.json() as { employeeId: number };
-
+  http.post(`${API_BASE_URL}/gateway/timeclock/entry`, async () => {
     return HttpResponse.json({
       success: true,
       message: 'Check-in registrado exitosamente',
@@ -165,9 +163,7 @@ export const handlers = [
   }),
 
   // Attendance - Check Out
-  http.post(`${API_BASE_URL}/gateway/timeclock/exit`, async ({ request }) => {
-    const body = await request.json() as { employeeId: number };
-
+  http.post(`${API_BASE_URL}/gateway/timeclock/exit`, async () => {
     return HttpResponse.json({
       success: true,
       message: 'Check-out registrado exitosamente',
