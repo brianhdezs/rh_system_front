@@ -95,10 +95,13 @@ export default function PerformanceListPage({
         <form onSubmit={handleSearch} className="flex space-x-4">
           <div className="flex-1">
             <Input
+              id="employeeId"
+              name="employeeId"
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
               placeholder="Ingresa el ID del empleado"
+              className="text-base"
               required
             />
           </div>

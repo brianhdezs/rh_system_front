@@ -7,15 +7,17 @@ import {
   Clock,
   ArrowRight,
   Plane,
+  Loader,
 } from "lucide-react";
 import StatCard from "../admin/components/StatCard";
 import QuickActions from "../admin/components/QuickActions";
 import ActivityFeed from "../admin/components/ActivityFeed";
 import Chart from "../admin/components/Chart";
+import { useDashboardStats } from "../hooks/useDashboardStats";
 
 interface DashboardPageProps {
   onNavigateToEmployees: () => void;
-  onNavigateToLeave: () => void;
+  onNavigateToLeave?: () => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
@@ -23,38 +25,45 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateToLeave,
 }) => {
   const { user } = useAuth();
+  const {
+    totalEmployees,
+    attendanceToday,
+    pendingLeaveRequests,
+    loading,
+    error,
+  } = useDashboardStats();
 
-  // Datos temporales - reemplazar con datos de tu API
   const quickStats = [
     {
       title: "Empleados Activos",
-      value: "0",
+      value: loading ? "..." : totalEmployees.toString(),
       icon: Users,
       color: "bg-blue-500",
       description: "Total de empleados",
     },
     {
       title: "Asistencias Hoy",
-      value: "0",
+      value: loading ? "..." : attendanceToday.toString(),
       icon: Clock,
       color: "bg-green-500",
       description: "Registros del día",
     },
     {
       title: "Solicitudes Pendientes",
-      value: "0",
+      value: loading ? "..." : pendingLeaveRequests.toString(),
       icon: Plane,
       color: "bg-purple-500",
       description: "Permisos por aprobar",
     },
     {
-      title: "Documentos",
+      title: "Evaluaciones",
       value: "0",
       icon: FileText,
       color: "bg-orange-500",
-      description: "Pendientes",
+      description: "En revisión",
     },
   ];
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -85,6 +94,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">⚠️ {error}</p>
+          <p className="text-sm text-red-600 mt-1">
+            Algunas estadísticas pueden no estar disponibles
+          </p>
+        </div>
+      )}
+
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {quickStats.map((stat, index) => (
@@ -98,12 +117,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         ))}
       </div>
 
+      {/* Loading Indicator */}
+      {loading && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center space-x-3">
+          <Loader className="animate-spin text-blue-600" size={20} />
+          <p className="text-blue-800">
+            Cargando estadísticas en tiempo real...
+          </p>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Charts */}
         <div className="lg:col-span-2 space-y-6">
-          <Chart title="Asistencias por Departamento" data={[]} />
-          <Chart title="Empleados por Área" data={[]} />
+          <Chart title="Asistencias por Departamento" />
+          <Chart title="Empleados por Área" />
         </div>
 
         {/* Sidebar */}
@@ -152,7 +181,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Próximos Pasos
+            Acceso Rápido
           </h2>
           <div className="space-y-3">
             <button
@@ -160,41 +189,47 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               className="w-full flex items-start space-x-3 p-3 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors text-left"
             >
               <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-                1
+                <Users size={14} />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
-                  Agregar empleados
+                  Gestionar Empleados
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
-                  Comienza registrando a tu equipo
+                  {totalEmployees} empleados activos
                 </p>
               </div>
               <ArrowRight size={20} className="text-indigo-600 mt-1" />
             </button>
-            <div className="flex items-start space-x-3 p-3 bg-purple-50 rounded-lg">
+
+            <button
+              onClick={onNavigateToLeave}
+              className="w-full flex items-start space-x-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-left"
+            >
               <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-                2
+                <Plane size={14} />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
-                  Crear departamentos
+                  Solicitudes de Permisos
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
-                  Organiza las áreas de tu empresa
+                  {pendingLeaveRequests} solicitudes pendientes
                 </p>
               </div>
-            </div>
+              <ArrowRight size={20} className="text-purple-600 mt-1" />
+            </button>
+
             <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
               <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-                3
+                <Clock size={14} />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  Configurar asistencias
+                  Asistencias de Hoy
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
-                  Define horarios y políticas
+                  {attendanceToday} registros del día
                 </p>
               </div>
             </div>
