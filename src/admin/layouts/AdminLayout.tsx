@@ -14,6 +14,11 @@ import AttendanceClockPage from "../../pages/attendance/AttendanceClockPage";
 import AttendanceHistoryPage from "../../pages/attendance/AttendanceHistoryPage";
 import AttendanceDailyPage from "../../pages/attendance/AttendanceDailyPage";
 import AttendanceMainPage from "../../pages/attendance/AttendanceMainPage";
+import LeaveMainPage from "../../pages/leave/LeaveMainPage";
+import LeaveRequestPage from "../../pages/leave/LeaveRequestPage";
+import LeaveHistoryPage from "../../pages/leave/LeaveHistoryPage";
+import LeaveBalancePage from "../../pages/leave/LeaveBalancePage";
+import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
 
 type Page =
   | "dashboard"
@@ -28,6 +33,11 @@ type Page =
   | "attendance-clock"
   | "attendance-history"
   | "attendance-daily"
+  | "leave"
+  | "leave-request"
+  | "leave-history"
+  | "leave-balance"
+  | "leave-approval"
   | "departments"
   | "reports"
   | "notifications"
@@ -55,6 +65,7 @@ const AdminLayout = () => {
         return (
           <DashboardPage
             onNavigateToEmployees={() => setCurrentPage("employees")}
+            onNavigateToLeave={() => setCurrentPage("leave")} // ← NUEVO
           />
         );
 
@@ -142,6 +153,29 @@ const AdminLayout = () => {
 
       case "attendance-daily":
         return <AttendanceDailyPage />;
+      case "leave":
+        return (
+          <LeaveMainPage
+            onNavigateToRequest={() => setCurrentPage("leave-request")}
+            onNavigateToHistory={() => setCurrentPage("leave-history")}
+            onNavigateToBalance={() => setCurrentPage("leave-balance")}
+            onNavigateToApproval={() => setCurrentPage("leave-approval")}
+          />
+        );
+
+      case "leave-request":
+        return (
+          <LeaveRequestPage onNavigateBack={() => setCurrentPage("leave")} />
+        );
+
+      case "leave-history":
+        return <LeaveHistoryPage />;
+
+      case "leave-balance":
+        return <LeaveBalancePage />;
+
+      case "leave-approval":
+        return <LeaveApprovalPage />;
       case "departments":
       case "reports":
       case "notifications":
@@ -168,6 +202,7 @@ const AdminLayout = () => {
         return (
           <DashboardPage
             onNavigateToEmployees={() => setCurrentPage("employees")}
+            onNavigateToLeave={() => setCurrentPage("leave")}
           />
         );
     }

@@ -12,6 +12,7 @@ import {
   LogOut,
   Calendar,
   Briefcase,
+  Plane,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -35,6 +36,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { icon: Users, label: "Empleados", page: "employees" },
     { icon: BarChart3, label: "Evaluaciones", page: "performance" },
     { icon: Calendar, label: "Asistencias", page: "attendance" },
+    { icon: Plane, label: "Vacaciones", page: "leave" },
     { icon: Briefcase, label: "Departamentos", page: "departments" },
     { icon: BarChart3, label: "Reportes", page: "reports" },
     { icon: FileText, label: "Documentos", page: "documents" },
@@ -83,7 +85,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
               (currentPage.includes("performance") &&
                 item.page === "performance") ||
               (currentPage.includes("attendance") &&
-                item.page === "attendance");
+                item.page === "attendance") ||
+              (currentPage.includes("leave") && item.page === "leave"); // ← NUEVO
             return (
               <li key={index}>
                 <button

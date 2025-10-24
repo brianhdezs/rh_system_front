@@ -3,10 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import {
   Users,
   Calendar,
-  Briefcase,
   FileText,
   Clock,
   ArrowRight,
+  Plane,
 } from "lucide-react";
 import StatCard from "../admin/components/StatCard";
 import QuickActions from "../admin/components/QuickActions";
@@ -15,10 +15,12 @@ import Chart from "../admin/components/Chart";
 
 interface DashboardPageProps {
   onNavigateToEmployees: () => void;
+  onNavigateToLeave: () => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateToEmployees,
+  onNavigateToLeave,
 }) => {
   const { user } = useAuth();
 
@@ -39,11 +41,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       description: "Registros del día",
     },
     {
-      title: "Departamentos",
+      title: "Solicitudes Pendientes",
       value: "0",
-      icon: Briefcase,
+      icon: Plane,
       color: "bg-purple-500",
-      description: "Áreas activas",
+      description: "Permisos por aprobar",
     },
     {
       title: "Documentos",
@@ -53,7 +55,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       description: "Pendientes",
     },
   ];
-
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -107,7 +108,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <QuickActions onNavigateToEmployees={onNavigateToEmployees} />
+          <QuickActions
+            onNavigateToEmployees={onNavigateToEmployees}
+            onNavigateToLeave={onNavigateToLeave}
+          />
           <ActivityFeed />
         </div>
       </div>

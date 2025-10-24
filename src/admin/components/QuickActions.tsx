@@ -5,22 +5,30 @@ import {
   Briefcase,
   FileText,
   Calendar,
-  Settings,
+  Plane, // ← NUEVO
 } from "lucide-react";
 
 interface QuickActionsProps {
-  onNavigateToEmployees: () => void;
+  onNavigateToEmployees?: () => void;
+  onNavigateToLeave?: () => void; // ← NUEVO
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({
   onNavigateToEmployees,
+  onNavigateToLeave, // ← NUEVO
 }) => {
   const actions = [
     {
       icon: UserPlus,
       label: "Nuevo Empleado",
       color: "bg-indigo-500 hover:bg-indigo-600",
-      onClick: onNavigateToEmployees,
+      onClick: onNavigateToEmployees || (() => console.log("Nuevo empleado")),
+    },
+    {
+      icon: Plane,
+      label: "Solicitar Permiso",
+      color: "bg-purple-500 hover:bg-purple-600",
+      onClick: onNavigateToLeave || (() => console.log("Solicitar permiso")),
     },
     {
       icon: Clock,
@@ -31,26 +39,20 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       icon: Briefcase,
       label: "Nuevo Departamento",
-      color: "bg-purple-500 hover:bg-purple-600",
+      color: "bg-orange-500 hover:bg-orange-600",
       onClick: () => console.log("Nuevo departamento"),
     },
     {
       icon: FileText,
       label: "Generar Reporte",
-      color: "bg-orange-500 hover:bg-orange-600",
+      color: "bg-blue-500 hover:bg-blue-600",
       onClick: () => console.log("Generar reporte"),
     },
     {
       icon: Calendar,
       label: "Ver Calendario",
-      color: "bg-blue-500 hover:bg-blue-600",
-      onClick: () => console.log("Ver calendario"),
-    },
-    {
-      icon: Settings,
-      label: "Configuración",
       color: "bg-gray-500 hover:bg-gray-600",
-      onClick: () => console.log("Configuración"),
+      onClick: () => console.log("Ver calendario"),
     },
   ];
 
