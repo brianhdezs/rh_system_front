@@ -101,7 +101,7 @@ export default function AttendanceClockPage() {
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Ingresa tu ID de empleado"
+              placeholder="Ingresa tu número de empleado"
               required
             />
           </div>

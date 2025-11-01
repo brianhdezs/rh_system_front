@@ -100,7 +100,7 @@ export default function PerformanceListPage({
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Ingresa el ID del empleado"
+              placeholder="Ingresa el número de empleado"
               className="text-base"
               required
             />

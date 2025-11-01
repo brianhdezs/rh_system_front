@@ -94,8 +94,8 @@ export default function LeaveApprovalPage() {
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="ID del empleado"
-              label="ID del Empleado"
+              placeholder="Ingresa número del Empleado"
+              label="Número del empleado"
               required
             />
             <Input
@@ -103,7 +103,7 @@ export default function LeaveApprovalPage() {
               value={reviewerId}
               onChange={(e) => setReviewerId(e.target.value)}
               placeholder="Tu ID como revisor"
-              label="ID del Revisor (Tu ID)"
+              label="Número del Revisor (Tu ID)"
               required
             />
           </div>

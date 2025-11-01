@@ -53,7 +53,7 @@ export default function LeaveHistoryPage() {
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="ID del empleado"
+              placeholder="Número del empleado"
               required
             />
           </div>

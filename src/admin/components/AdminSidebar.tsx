@@ -32,7 +32,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   const { user, logout } = useAuth();
 
   const menuItems = [
-    { icon: Home, label: "Dashboard", page: "dashboard" },
+    { icon: Home, label: "Inicio", page: "dashboard" },
     { icon: Users, label: "Empleados", page: "employees" },
     { icon: BarChart3, label: "Evaluaciones", page: "performance" },
     { icon: Calendar, label: "Asistencias", page: "attendance" },

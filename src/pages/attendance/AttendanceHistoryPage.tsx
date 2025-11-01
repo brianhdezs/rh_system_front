@@ -105,7 +105,7 @@ export default function AttendanceHistoryPage() {
               type="number"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="ID del empleado"
+              placeholder="Ingresa tu número de empleado"
               required
             />
             <Input

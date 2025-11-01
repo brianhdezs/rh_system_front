@@ -94,7 +94,7 @@ export default function LeaveRequestPage({
                 type="number"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                placeholder="Ingresa tu ID de empleado"
+                placeholder="Ingresa tu número de empleado"
                 required
               />
             </div>
@@ -111,7 +111,7 @@ export default function LeaveRequestPage({
               Formulario de Solicitud
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Empleado ID: <strong>{employeeId}</strong>
+              Número de empleado: <strong>{employeeId}</strong>
             </p>
           </div>
 
