@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
@@ -10,21 +11,20 @@ interface RegisterProps {
 
 export default function Register({ onNavigateToLogin }: RegisterProps) {
   const { register } = useAuth();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    RoleId: 2, // Usuario por defecto
+    RoleId: 2,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Validaciones de contraseña en tiempo real
   const passwordValidations: Record<string, boolean> = {
     minLength: formData.password.length >= 8,
     hasUpperCase: /[A-Z]/.test(formData.password),
@@ -79,7 +79,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
       ...prev,
       [name]: name === "RoleId" ? parseInt(value) : value,
     }));
-    // Limpiar error del campo al escribir
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -87,14 +86,15 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError("");
 
     if (!validateForm()) {
       return;
     }
 
     if (!isPasswordValid) {
-      setApiError(
+      showToast(
+        "error",
+        "Requisitos de contraseña",
         "Por favor, cumple con todos los requisitos de la contraseña"
       );
       return;
@@ -105,9 +105,26 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      // El AuthContext redirigirá automáticamente si el registro es exitoso
+
+      // Mostrar toast de éxito
+      showToast(
+        "success",
+        "¡Cuenta creada exitosamente!",
+        "Redirigiendo al inicio de sesión..."
+      );
+
+      // Redirigir después de 2 segundos
+      setTimeout(() => {
+        if (onNavigateToLogin) {
+          onNavigateToLogin();
+        }
+      }, 2000);
     } catch (err: any) {
-      setApiError(err.message || "Error al registrar usuario");
+      showToast(
+        "error",
+        "Error al registrar",
+        err.message || "No se pudo crear la cuenta"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -128,12 +145,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {apiError && (
-            <div className="rounded-md bg-red-50 p-4 border border-red-200">
-              <p className="text-sm text-red-800">{apiError}</p>
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-4">
             <Input
               id="firstName"
@@ -170,7 +181,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
             placeholder="tu@email.com"
           />
 
-          {/* Password Field with Toggle */}
           <div>
             <label
               htmlFor="password"
@@ -202,7 +212,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
             )}
           </div>
 
-          {/* Confirm Password Field with Toggle */}
           <div>
             <label
               htmlFor="confirmPassword"
@@ -236,7 +245,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
             )}
           </div>
 
-          {/* Password Requirements */}
           {formData.password && (
             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
               <p className="text-sm font-medium text-gray-700 mb-2">
@@ -263,17 +271,16 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
                   isValid={passwordValidations.hasSpecialChar}
                   text="Al menos un carácter especial (!@#$%...)"
                 />
+                {formData.confirmPassword && (
+                  <ValidationItem
+                    isValid={passwordValidations.passwordsMatch}
+                    text="Las contraseñas coinciden"
+                  />
+                )}
               </div>
             </div>
           )}
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            {formData.confirmPassword && (
-              <ValidationItem
-                isValid={passwordValidations.passwordsMatch}
-                text="Las contraseñas coinciden"
-              />
-            )}
-          </div>
+
           <div>
             <label
               htmlFor="RoleId"
@@ -317,7 +324,6 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
   );
 }
 
-// Componente auxiliar para mostrar validaciones
 interface ValidationItemProps {
   isValid: boolean;
   text: string;

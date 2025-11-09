@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import AdminDashboard from "./admin/layouts/AdminLayout";
@@ -11,7 +12,6 @@ function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
 
-  // Mostrar un loading mientras se verifica la autenticación
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -20,12 +20,10 @@ function AppContent() {
     );
   }
 
-  // Si está autenticado, mostrar el dashboard
   if (isAuthenticated) {
     return <AdminDashboard />;
   }
 
-  // Si no está autenticado, mostrar login o registro
   return showRegister ? (
     <Register onNavigateToLogin={() => setShowRegister(false)} />
   ) : (
@@ -36,7 +34,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 }
