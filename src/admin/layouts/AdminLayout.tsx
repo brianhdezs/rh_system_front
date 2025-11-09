@@ -19,6 +19,7 @@ import LeaveRequestPage from "../../pages/leave/LeaveRequestPage";
 import LeaveHistoryPage from "../../pages/leave/LeaveHistoryPage";
 import LeaveBalancePage from "../../pages/leave/LeaveBalancePage";
 import LeaveApprovalPage from "../../pages/leave/LeaveApprovalPage";
+import PerformanceCyclesSearchPage from "../../pages/performance/PerformanceCyclesSearchPage";
 
 type Page =
   | "dashboard"
@@ -29,6 +30,7 @@ type Page =
   | "performance-cycles"
   | "performance-create"
   | "performance-form"
+  | "performance-cycles-search"
   | "attendance"
   | "attendance-clock"
   | "attendance-history"
@@ -103,6 +105,9 @@ const AdminLayout = () => {
           <PerformanceListPage
             onNavigateToCreate={() => setCurrentPage("performance-create")}
             onNavigateToCycles={() => setCurrentPage("performance-cycles")}
+            onNavigateToCyclesSearch={() =>
+              setCurrentPage("performance-cycles-search")
+            }
           />
         );
 
@@ -112,6 +117,8 @@ const AdminLayout = () => {
             onNavigateBack={() => setCurrentPage("performance")}
           />
         );
+      case "performance-cycles-search":
+        return <PerformanceCyclesSearchPage />;
 
       case "performance-create":
         return (

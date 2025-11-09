@@ -55,6 +55,32 @@ class PerformanceService {
     return response.json();
   }
 
+  // NUEVO: Buscar periodos de evaluación
+  async searchCycles(searchTerm: string): Promise<ApiResponse<EvaluationCycle[]>> {
+    const response = await fetch(`${API_BASE_URL}/cycles/search?q=${encodeURIComponent(searchTerm)}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al buscar periodos');
+    }
+
+    return response.json();
+  }
+
+  // NUEVO: Obtener todos los periodos
+  async getAllCycles(): Promise<ApiResponse<EvaluationCycle[]>> {
+    const response = await fetch(`${API_BASE_URL}/cycles`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener periodos');
+    }
+
+    return response.json();
+  }
+
   // Crear evaluación
   async createEvaluation(evaluationData: CreateEvaluationRequest): Promise<ApiResponse<{ evaluationId: number; message: string }>> {
     const response = await fetch(`${API_BASE_URL}/assessments`, {

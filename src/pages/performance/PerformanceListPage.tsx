@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Loader, Plus } from "lucide-react";
+import { Search, Loader, Plus, FolderSearch } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import EvaluationCard from "../../components/performance/EvaluationCard";
@@ -9,13 +9,18 @@ import type { Evaluation } from "../../types/PerformanceTypes";
 interface PerformanceListPageProps {
   onNavigateToCreate: () => void;
   onNavigateToCycles: () => void;
+  onNavigateToCyclesSearch: () => void;
 }
 
 export default function PerformanceListPage({
   onNavigateToCreate,
   onNavigateToCycles,
+  onNavigateToCyclesSearch,
 }: PerformanceListPageProps) {
-  const [employeeId, setEmployeeId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState<"employee" | "period">(
+    "employee"
+  );
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,17 +28,46 @@ export default function PerformanceListPage({
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!employeeId) return;
+    if (!searchTerm) return;
 
     setError(null);
     setSearched(false);
 
     try {
       setLoading(true);
-      const response = await performanceService.getEmployeeEvaluations(
-        parseInt(employeeId)
-      );
-      setEvaluations(response.data);
+
+      if (searchType === "employee") {
+        // Buscar por ID de empleado
+        const employeeId = parseInt(searchTerm);
+        if (isNaN(employeeId)) {
+          throw new Error("El ID del empleado debe ser un número");
+        }
+        const response = await performanceService.getEmployeeEvaluations(
+          employeeId
+        );
+        setEvaluations(response.data);
+      } else {
+        // Buscar por nombre de periodo
+        // Primero obtener todos los ciclos
+        const cyclesResponse = await performanceService.getAllCycles();
+        const matchingCycles = cyclesResponse.data.filter((cycle: any) =>
+          cycle.periodName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (matchingCycles.length === 0) {
+          setEvaluations([]);
+        } else {
+          // Por ahora, mostrar mensaje que se encontraron los periodos
+          // En una implementación completa, necesitarías un endpoint que obtenga
+          // evaluaciones por periodId
+          setError(
+            `Se encontraron ${matchingCycles.length} periodo(s) con "${searchTerm}". ` +
+              "Para ver evaluaciones específicas, busca por ID de empleado."
+          );
+          setEvaluations([]);
+        }
+      }
+
       setSearched(true);
     } catch (err: any) {
       setError(err.message || "Error al buscar evaluaciones");
@@ -80,6 +114,10 @@ export default function PerformanceListPage({
           </p>
         </div>
         <div className="flex space-x-3">
+          <Button variant="secondary" onClick={onNavigateToCyclesSearch}>
+            <FolderSearch size={20} className="mr-2" />
+            Buscar Periodos
+          </Button>
           <Button variant="secondary" onClick={onNavigateToCycles}>
             Crear Periodo
           </Button>
@@ -92,23 +130,61 @@ export default function PerformanceListPage({
 
       {/* Search Form */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <form onSubmit={handleSearch} className="flex space-x-4">
-          <div className="flex-1">
-            <Input
-              id="employeeId"
-              name="employeeId"
-              type="number"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Ingresa el número de empleado"
-              className="text-base"
-              required
-            />
+        <form onSubmit={handleSearch} className="space-y-4">
+          {/* Selector de tipo de búsqueda */}
+          <div className="flex space-x-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="searchType"
+                value="employee"
+                checked={searchType === "employee"}
+                onChange={(e) =>
+                  setSearchType(e.target.value as "employee" | "period")
+                }
+                className="w-4 h-4 text-indigo-600 focus:ring-indigo-600"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Buscar por Empleado
+              </span>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="radio"
+                name="searchType"
+                value="period"
+                checked={searchType === "period"}
+                onChange={(e) =>
+                  setSearchType(e.target.value as "employee" | "period")
+                }
+                className="w-4 h-4 text-indigo-600 focus:ring-indigo-600"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                Buscar por Periodo
+              </span>
+            </label>
           </div>
-          <Button type="submit" isLoading={loading}>
-            <Search size={20} className="mr-2" />
-            Buscar
-          </Button>
+
+          {/* Campo de búsqueda */}
+          <div className="flex space-x-4">
+            <div className="flex-1">
+              <Input
+                type={searchType === "employee" ? "number" : "text"}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={
+                  searchType === "employee"
+                    ? "Ingresa el ID del empleado (ej: 10)"
+                    : "Ingresa el nombre del periodo (ej: Agosto 2025)"
+                }
+                required
+              />
+            </div>
+            <Button type="submit" isLoading={loading}>
+              <Search size={20} className="mr-2" />
+              Buscar
+            </Button>
+          </div>
         </form>
       </div>
 
@@ -167,24 +243,40 @@ export default function PerformanceListPage({
         <>
           {evaluations.length === 0 ? (
             <div className="bg-white rounded-lg p-12 text-center border border-gray-200">
+              <Search size={64} className="mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500">
-                No se encontraron evaluaciones para este empleado
+                {searchType === "employee"
+                  ? "No se encontraron evaluaciones para este empleado"
+                  : "No se encontraron evaluaciones para este periodo"}
               </p>
               <button
                 onClick={onNavigateToCreate}
                 className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               >
-                Crear Primera Evaluación
+                Crear Nueva Evaluación
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {evaluations.map((evaluation) => (
-                <EvaluationCard
-                  key={evaluation.evaluationId}
-                  evaluation={evaluation}
-                />
-              ))}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Resultados de Búsqueda
+                </h2>
+                <span className="text-sm text-gray-600">
+                  {evaluations.length}{" "}
+                  {evaluations.length === 1
+                    ? "evaluación encontrada"
+                    : "evaluaciones encontradas"}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {evaluations.map((evaluation) => (
+                  <EvaluationCard
+                    key={evaluation.evaluationId}
+                    evaluation={evaluation}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </>
@@ -197,9 +289,17 @@ export default function PerformanceListPage({
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             Busca Evaluaciones
           </h3>
-          <p className="text-gray-600">
-            Ingresa el ID de un empleado para ver sus evaluaciones de desempeño
+          <p className="text-gray-600 mb-4">
+            Selecciona el tipo de búsqueda e ingresa el criterio
           </p>
+          <div className="flex justify-center space-x-4 text-sm text-gray-600">
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <strong>Por Empleado:</strong> Busca por ID
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <strong>Por Periodo:</strong> Busca por nombre
+            </div>
+          </div>
         </div>
       )}
     </div>

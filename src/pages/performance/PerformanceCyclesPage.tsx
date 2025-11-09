@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import { useToast } from "../../context/ToastContext";
 import { performanceService } from "../../services/PerformanceService";
 import type { EvaluationCycle } from "../../types/PerformanceTypes";
 
@@ -12,14 +13,13 @@ interface PerformanceCyclesPageProps {
 export default function PerformanceCyclesPage({
   onNavigateBack,
 }: PerformanceCyclesPageProps) {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     periodName: "",
     startDate: "",
     endDate: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,8 +28,6 @@ export default function PerformanceCyclesPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     try {
       setIsLoading(true);
@@ -43,12 +41,19 @@ export default function PerformanceCyclesPage({
       const response = await performanceService.createCycle(cycleData);
 
       if (response.success) {
-        setSuccess(true);
+        showToast(
+          "success",
+          "Periodo creado exitosamente",
+          `El periodo "${formData.periodName}" ha sido creado`
+        );
         setFormData({ periodName: "", startDate: "", endDate: "" });
-        alert("Periodo creado exitosamente");
       }
     } catch (err: any) {
-      setError(err.message || "Error al crear periodo");
+      showToast(
+        "error",
+        "Error al crear periodo",
+        err.message || "No se pudo crear el periodo"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -73,19 +78,6 @@ export default function PerformanceCyclesPage({
           </p>
         </div>
       </div>
-
-      {/* Error/Success Messages */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">Periodo creado exitosamente</p>
-        </div>
-      )}
 
       {/* Form */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
