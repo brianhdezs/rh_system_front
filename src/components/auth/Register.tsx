@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
+import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 
 interface RegisterProps {
   onNavigateToLogin?: () => void;
@@ -20,6 +21,22 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Validaciones de contraseña en tiempo real
+  const passwordValidations: Record<string, boolean> = {
+    minLength: formData.password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(formData.password),
+    hasLowerCase: /[a-z]/.test(formData.password),
+    hasNumber: /[0-9]/.test(formData.password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>_-]/.test(formData.password),
+    passwordsMatch: Boolean(
+      formData.password && formData.password === formData.confirmPassword
+    ),
+  };
+
+  const isPasswordValid = Object.values(passwordValidations).every(Boolean);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -44,7 +61,9 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
       newErrors.password = "La contraseña debe tener al menos 8 caracteres";
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Debes confirmar tu contraseña";
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
@@ -71,6 +90,13 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
     setApiError("");
 
     if (!validateForm()) {
+      return;
+    }
+
+    if (!isPasswordValid) {
+      setApiError(
+        "Por favor, cumple con todos los requisitos de la contraseña"
+      );
       return;
     }
 
@@ -103,7 +129,7 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           {apiError && (
-            <div className="rounded-md bg-red-50 p-4">
+            <div className="rounded-md bg-red-50 p-4 border border-red-200">
               <p className="text-sm text-red-800">{apiError}</p>
             </div>
           )}
@@ -144,30 +170,110 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
             placeholder="tu@email.com"
           />
 
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            label="Contraseña"
-            value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
-            autoComplete="new-password"
-            placeholder="••••••••"
-          />
+          {/* Password Field with Toggle */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-900 mb-2"
+            >
+              Contraseña (mínimo 8 caracteres)
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 placeholder:text-gray-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+            )}
+          </div>
 
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            label="Confirmar contraseña"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            error={errors.confirmPassword}
-            autoComplete="new-password"
-            placeholder="••••••••"
-          />
+          {/* Confirm Password Field with Toggle */}
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-900 mb-2"
+            >
+              Confirmar contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-gray-900 placeholder:text-gray-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
 
+          {/* Password Requirements */}
+          {formData.password && (
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Requisitos de la contraseña:
+              </p>
+              <div className="space-y-1">
+                <ValidationItem
+                  isValid={passwordValidations.minLength}
+                  text="Mínimo 8 caracteres"
+                />
+                <ValidationItem
+                  isValid={passwordValidations.hasUpperCase}
+                  text="Al menos una letra mayúscula"
+                />
+                <ValidationItem
+                  isValid={passwordValidations.hasLowerCase}
+                  text="Al menos una letra minúscula"
+                />
+                <ValidationItem
+                  isValid={passwordValidations.hasNumber}
+                  text="Al menos un número"
+                />
+                <ValidationItem
+                  isValid={passwordValidations.hasSpecialChar}
+                  text="Al menos un carácter especial (!@#$%...)"
+                />
+              </div>
+            </div>
+          )}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            {formData.confirmPassword && (
+              <ValidationItem
+                isValid={passwordValidations.passwordsMatch}
+                text="Las contraseñas coinciden"
+              />
+            )}
+          </div>
           <div>
             <label
               htmlFor="RoleId"
@@ -180,14 +286,18 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
               name="RoleId"
               value={formData.RoleId}
               onChange={handleChange}
-              className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
             >
               <option value={2}>Usuario</option>
               <option value={1}>Administrador</option>
             </select>
           </div>
 
-          <Button type="submit" isLoading={isLoading}>
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            disabled={!isPasswordValid && formData.password.length > 0}
+          >
             Crear cuenta
           </Button>
         </form>
@@ -203,6 +313,27 @@ export default function Register({ onNavigateToLogin }: RegisterProps) {
           </button>
         </p>
       </div>
+    </div>
+  );
+}
+
+// Componente auxiliar para mostrar validaciones
+interface ValidationItemProps {
+  isValid: boolean;
+  text: string;
+}
+
+function ValidationItem({ isValid, text }: ValidationItemProps) {
+  return (
+    <div className="flex items-center space-x-2 text-sm">
+      {isValid ? (
+        <CheckCircle size={16} className="text-green-600 flex-shrink-0" />
+      ) : (
+        <XCircle size={16} className="text-gray-400 flex-shrink-0" />
+      )}
+      <span className={isValid ? "text-green-700" : "text-gray-600"}>
+        {text}
+      </span>
     </div>
   );
 }
