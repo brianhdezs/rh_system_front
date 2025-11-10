@@ -3,15 +3,10 @@ import {
   Home,
   Users,
   BarChart3,
-  Settings,
-  FileText,
-  Bell,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
   LogOut,
   Calendar,
-  Briefcase,
   Plane,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -37,12 +32,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { icon: BarChart3, label: "Evaluaciones", page: "performance" },
     { icon: Calendar, label: "Asistencias", page: "attendance" },
     { icon: Plane, label: "Vacaciones", page: "leave" },
-    { icon: Briefcase, label: "Departamentos", page: "departments" },
-    { icon: BarChart3, label: "Reportes", page: "reports" },
-    { icon: FileText, label: "Documentos", page: "documents" },
-    { icon: Bell, label: "Notificaciones", page: "notifications" },
-    { icon: Settings, label: "Configuración", page: "settings" },
-    { icon: HelpCircle, label: "Ayuda", page: "help" },
   ];
 
   const getInitials = (fullName: string) => {

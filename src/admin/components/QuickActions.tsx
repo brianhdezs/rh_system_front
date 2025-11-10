@@ -1,58 +1,43 @@
 import React from "react";
-import {
-  UserPlus,
-  Clock,
-  Briefcase,
-  FileText,
-  Calendar,
-  Plane, // ← NUEVO
-} from "lucide-react";
+import { UserPlus, Clock, BarChart3, Plane } from "lucide-react";
 
 interface QuickActionsProps {
   onNavigateToEmployees?: () => void;
-  onNavigateToLeave?: () => void; // ← NUEVO
+  onNavigateToLeave?: () => void;
+  onNavigateToAttendance?: () => void;
+  onNavigateToPerformance?: () => void;
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({
   onNavigateToEmployees,
-  onNavigateToLeave, // ← NUEVO
+  onNavigateToLeave,
+  onNavigateToAttendance,
+  onNavigateToPerformance,
 }) => {
   const actions = [
     {
       icon: UserPlus,
-      label: "Nuevo Empleado",
+      label: "Gestionar Empleados",
       color: "bg-indigo-500 hover:bg-indigo-600",
-      onClick: onNavigateToEmployees || (() => console.log("Nuevo empleado")),
+      onClick: onNavigateToEmployees,
     },
     {
       icon: Plane,
-      label: "Solicitar Permiso",
+      label: "Solicitudes de Permisos",
       color: "bg-purple-500 hover:bg-purple-600",
-      onClick: onNavigateToLeave || (() => console.log("Solicitar permiso")),
+      onClick: onNavigateToLeave,
     },
     {
       icon: Clock,
-      label: "Registrar Asistencia",
+      label: "Control de Asistencias",
       color: "bg-green-500 hover:bg-green-600",
-      onClick: () => console.log("Registrar asistencia"),
+      onClick: onNavigateToAttendance,
     },
     {
-      icon: Briefcase,
-      label: "Nuevo Departamento",
+      icon: BarChart3,
+      label: "Evaluaciones",
       color: "bg-orange-500 hover:bg-orange-600",
-      onClick: () => console.log("Nuevo departamento"),
-    },
-    {
-      icon: FileText,
-      label: "Generar Reporte",
-      color: "bg-blue-500 hover:bg-blue-600",
-      onClick: () => console.log("Generar reporte"),
-    },
-    {
-      icon: Calendar,
-      label: "Ver Calendario",
-      color: "bg-gray-500 hover:bg-gray-600",
-      onClick: () => console.log("Ver calendario"),
+      onClick: onNavigateToPerformance,
     },
   ];
 
@@ -61,16 +46,16 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Acciones Rápidas
       </h3>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         {actions.map((action, index) => {
           const Icon = action.icon;
           return (
             <button
               key={index}
               onClick={action.onClick}
-              className={`flex items-center space-x-2 p-3 rounded-lg text-white transition-colors ${action.color}`}
+              className={`flex items-center space-x-3 p-3 rounded-lg text-white transition-colors ${action.color}`}
             >
-              <Icon size={18} />
+              <Icon size={20} />
               <span className="text-sm font-medium">{action.label}</span>
             </button>
           );

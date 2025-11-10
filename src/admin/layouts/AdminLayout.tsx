@@ -67,7 +67,9 @@ const AdminLayout = () => {
         return (
           <DashboardPage
             onNavigateToEmployees={() => setCurrentPage("employees")}
-            onNavigateToLeave={() => setCurrentPage("leave")} // ← NUEVO
+            onNavigateToLeave={() => setCurrentPage("leave")}
+            onNavigateToAttendance={() => setCurrentPage("attendance")}
+            onNavigateToPerformance={() => setCurrentPage("performance")}
           />
         );
 

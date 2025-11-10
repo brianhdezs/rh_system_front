@@ -4,9 +4,11 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import LeaveCard from "../../components/leave/LeaveCard";
 import { useLeaveRequests } from "../../hooks/useLeave";
+import { useToast } from "../../context/ToastContext";
 import { leaveService } from "../../services/LeaveService";
 
 export default function LeaveApprovalPage() {
+  const { showToast } = useToast();
   const [employeeId, setEmployeeId] = useState("");
   const [reviewerId, setReviewerId] = useState("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(
@@ -55,10 +57,18 @@ export default function LeaveApprovalPage() {
 
       if (reviewAction === "approve") {
         await leaveService.approveRequest(selectedRequestId, reviewData);
-        alert("✓ Solicitud aprobada exitosamente");
+        showToast(
+          "success",
+          "Solicitud aprobada",
+          "La solicitud ha sido aprobada exitosamente"
+        );
       } else {
         await leaveService.rejectRequest(selectedRequestId, reviewData);
-        alert("✓ Solicitud rechazada");
+        showToast(
+          "error",
+          "Solicitud rechazada",
+          "La solicitud ha sido rechazada"
+        );
       }
 
       setShowReviewModal(false);
@@ -66,7 +76,11 @@ export default function LeaveApprovalPage() {
       setReviewComments("");
       refetch();
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      showToast(
+        "error",
+        "Error",
+        err.message || "No se pudo procesar la solicitud"
+      );
     } finally {
       setProcessing(false);
     }
@@ -181,60 +195,75 @@ export default function LeaveApprovalPage() {
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              {reviewAction === "approve"
-                ? "Aprobar Solicitud"
-                : "Rechazar Solicitud"}
-            </h3>
+        <>
+          {/* Overlay con backdrop blur */}
+          <div
+            className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40"
+            onClick={() => {
+              setShowReviewModal(false);
+              setReviewComments("");
+            }}
+          />
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Comentarios {reviewAction === "reject" && "(Requerido)"}
-              </label>
-              <textarea
-                value={reviewComments}
-                onChange={(e) => setReviewComments(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder={
-                  reviewAction === "approve"
-                    ? "Comentarios opcionales..."
-                    : "Explica el motivo del rechazo..."
-                }
-                required={reviewAction === "reject"}
-              />
-            </div>
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div
+              className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                {reviewAction === "approve"
+                  ? "Aprobar Solicitud"
+                  : "Rechazar Solicitud"}
+              </h3>
 
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  setShowReviewModal(false);
-                  setReviewComments("");
-                }}
-                disabled={processing}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSubmitReview}
-                disabled={
-                  processing ||
-                  (reviewAction === "reject" && !reviewComments.trim())
-                }
-                className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
-                  reviewAction === "approve"
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "bg-red-500 hover:bg-red-600"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {processing ? "Procesando..." : "Confirmar"}
-              </button>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Comentarios {reviewAction === "reject" && "(Requerido)"}
+                </label>
+                <textarea
+                  value={reviewComments}
+                  onChange={(e) => setReviewComments(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder={
+                    reviewAction === "approve"
+                      ? "Comentarios opcionales..."
+                      : "Explica el motivo del rechazo..."
+                  }
+                  required={reviewAction === "reject"}
+                />
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setReviewComments("");
+                  }}
+                  disabled={processing}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSubmitReview}
+                  disabled={
+                    processing ||
+                    (reviewAction === "reject" && !reviewComments.trim())
+                  }
+                  className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors ${
+                    reviewAction === "approve"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-red-500 hover:bg-red-600"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {processing ? "Procesando..." : "Confirmar"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Initial State */}

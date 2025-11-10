@@ -14,15 +14,20 @@ import QuickActions from "../admin/components/QuickActions";
 import ActivityFeed from "../admin/components/ActivityFeed";
 import Chart from "../admin/components/Chart";
 import { useDashboardStats } from "../hooks/useDashboardStats";
+import { useDashboardCharts } from "../hooks/useDashboardCharts";
 
 interface DashboardPageProps {
   onNavigateToEmployees: () => void;
   onNavigateToLeave?: () => void;
+  onNavigateToAttendance?: () => void;
+  onNavigateToPerformance?: () => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateToEmployees,
   onNavigateToLeave,
+  onNavigateToAttendance,
+  onNavigateToPerformance,
 }) => {
   const { user } = useAuth();
   const {
@@ -33,6 +38,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     error,
   } = useDashboardStats();
 
+  const {
+    employeesByDepartment,
+    attendanceByDay,
+    loading: chartsLoading,
+  } = useDashboardCharts();
+
   const quickStats = [
     {
       title: "Empleados Activos",
@@ -40,6 +51,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       icon: Users,
       color: "bg-blue-500",
       description: "Total de empleados",
+      onClick: onNavigateToEmployees,
     },
     {
       title: "Asistencias Hoy",
@@ -47,6 +59,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       icon: Clock,
       color: "bg-green-500",
       description: "Registros del día",
+      onClick: onNavigateToAttendance,
     },
     {
       title: "Solicitudes Pendientes",
@@ -54,6 +67,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       icon: Plane,
       color: "bg-purple-500",
       description: "Permisos por aprobar",
+      onClick: onNavigateToLeave,
     },
     {
       title: "Evaluaciones",
@@ -61,6 +75,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       icon: FileText,
       color: "bg-orange-500",
       description: "En revisión",
+      onClick: onNavigateToPerformance,
     },
   ];
 
@@ -107,11 +122,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {quickStats.map((stat, index) => (
-          <div
-            key={index}
-            onClick={index === 0 ? onNavigateToEmployees : undefined}
-            className={index === 0 ? "cursor-pointer" : ""}
-          >
+          <div key={index} onClick={stat.onClick} className="cursor-pointer">
             <StatCard {...stat} />
           </div>
         ))}
@@ -131,8 +142,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Charts */}
         <div className="lg:col-span-2 space-y-6">
-          <Chart title="Asistencias por Departamento" />
-          <Chart title="Empleados por Área" />
+          <Chart
+            title="Empleados por Departamento"
+            data={employeesByDepartment}
+            loading={chartsLoading}
+          />
+          <Chart
+            title="Asistencias por Día (Última Semana)"
+            data={attendanceByDay}
+            loading={chartsLoading}
+          />
         </div>
 
         {/* Sidebar */}
@@ -140,6 +159,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <QuickActions
             onNavigateToEmployees={onNavigateToEmployees}
             onNavigateToLeave={onNavigateToLeave}
+            onNavigateToAttendance={onNavigateToAttendance}
+            onNavigateToPerformance={onNavigateToPerformance}
           />
           <ActivityFeed />
         </div>
@@ -220,11 +241,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <ArrowRight size={20} className="text-purple-600 mt-1" />
             </button>
 
-            <div className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+            <button
+              onClick={onNavigateToAttendance}
+              className="w-full flex items-start space-x-3 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left"
+            >
               <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
                 <Clock size={14} />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
                   Asistencias de Hoy
                 </p>
@@ -232,7 +256,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   {attendanceToday} registros del día
                 </p>
               </div>
-            </div>
+              <ArrowRight size={20} className="text-green-600 mt-1" />
+            </button>
           </div>
         </div>
       </div>

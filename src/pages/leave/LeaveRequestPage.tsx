@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import LeaveRequestForm from "../../components/leave/LeaveRequestForm";
+import { useToast } from "../../context/ToastContext";
 import { leaveService } from "../../services/LeaveService";
 import type { CreateLeaveRequest } from "../../types/LeaveTypes";
 
@@ -13,36 +14,40 @@ interface LeaveRequestPageProps {
 export default function LeaveRequestPage({
   onNavigateBack,
 }: LeaveRequestPageProps) {
+  const { showToast } = useToast();
   const [employeeId, setEmployeeId] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleEmployeeSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (employeeId) {
       setShowForm(true);
-      setError(null);
     }
   };
 
   const handleSubmit = async (data: CreateLeaveRequest) => {
-    setError(null);
-    setSuccess(false);
-
     try {
       const response = await leaveService.applyLeave(data);
 
       if (response.success) {
-        setSuccess(true);
-        alert(
-          `✓ ${response.message}\nID de Solicitud: ${response.data.requestId}`
+        showToast(
+          "success",
+          "¡Solicitud enviada exitosamente!",
+          `Tu solicitud ha sido creada. ID: ${response.data.requestId}`
         );
-        setShowForm(false);
-        setEmployeeId("");
+
+        // Limpiar formulario después de 2 segundos
+        setTimeout(() => {
+          setShowForm(false);
+          setEmployeeId("");
+        }, 2000);
       }
     } catch (err: any) {
-      setError(err.message || "Error al enviar solicitud");
+      showToast(
+        "error",
+        "Error al enviar solicitud",
+        err.message || "No se pudo crear la solicitud"
+      );
     }
   };
 
@@ -65,19 +70,6 @@ export default function LeaveRequestPage({
           </p>
         </div>
       </div>
-
-      {/* Messages */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">✓ Solicitud enviada exitosamente</p>
-        </div>
-      )}
 
       {/* Employee ID Input */}
       {!showForm && (
