@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Loader } from "lucide-react";
+import { ArrowLeft, Loader, AlertCircle } from "lucide-react";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useToast } from "../../context/ToastContext";
@@ -24,6 +24,7 @@ export default function CreateEvaluationPage({
   const [cycles, setCycles] = useState<EvaluationCycle[]>([]);
   const [loadingCycles, setLoadingCycles] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCycles();
@@ -32,14 +33,20 @@ export default function CreateEvaluationPage({
   const loadCycles = async () => {
     try {
       setLoadingCycles(true);
+      setError(null);
       const response = await performanceService.getAllCycles();
-      setCycles(response.data);
+
+      if (response.data.length === 0) {
+        setError(
+          "No hay periodos disponibles. Por favor, crea un periodo primero o asegúrate de tener evaluaciones existentes."
+        );
+      } else {
+        setCycles(response.data);
+      }
     } catch (err: any) {
-      showToast(
-        "error",
-        "Error al cargar periodos",
-        err.message || "No se pudieron cargar los periodos"
-      );
+      const errorMsg = err.message || "No se pudieron cargar los periodos";
+      setError(errorMsg);
+      showToast("error", "Error al cargar periodos", errorMsg);
     } finally {
       setLoadingCycles(false);
     }
@@ -71,7 +78,6 @@ export default function CreateEvaluationPage({
           `ID de evaluación: ${response.data.evaluationId}`
         );
 
-        // Redirigir al formulario después de un momento
         setTimeout(() => {
           onNavigateToForm(response.data.evaluationId);
         }, 1500);
@@ -97,7 +103,6 @@ export default function CreateEvaluationPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center space-x-4">
         <button
           onClick={onNavigateBack}
@@ -113,10 +118,8 @@ export default function CreateEvaluationPage({
         </div>
       </div>
 
-      {/* Form */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Dropdown de Periodos */}
           <div>
             <label
               htmlFor="periodId"
@@ -133,6 +136,27 @@ export default function CreateEvaluationPage({
                 <span className="text-sm text-gray-600">
                   Cargando periodos...
                 </span>
+              </div>
+            ) : error ? (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle
+                    className="text-yellow-600 flex-shrink-0 mt-0.5"
+                    size={20}
+                  />
+                  <div>
+                    <p className="text-sm text-yellow-800 font-medium">
+                      {error}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={loadCycles}
+                      className="text-sm text-yellow-700 underline mt-2 hover:text-yellow-900"
+                    >
+                      Intentar nuevamente
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : cycles.length === 0 ? (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -151,7 +175,7 @@ export default function CreateEvaluationPage({
                 className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
               >
                 <option value="">Selecciona un periodo</option>
-                {cycles.map((cycle: any) => (
+                {cycles.map((cycle) => (
                   <option key={cycle.periodId} value={cycle.periodId}>
                     {cycle.periodName} ({formatDate(cycle.startDate)} -{" "}
                     {formatDate(cycle.endDate)})
@@ -196,13 +220,13 @@ export default function CreateEvaluationPage({
         </form>
       </div>
 
-      {/* Info Card */}
       <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
         <h3 className="text-lg font-semibold text-blue-900 mb-3">
           📋 Información
         </h3>
         <ul className="space-y-2 text-sm text-blue-800">
-          <li>• Selecciona el periodo en el que se realizará la evaluación</li>
+          <li>• Los periodos se obtienen de evaluaciones existentes</li>
+          <li>• Si no ves periodos, crea primero una evaluación de prueba</li>
           <li>• Ingresa el ID del empleado que será evaluado</li>
           <li>• Ingresa tu ID como evaluador</li>
           <li>• Después de crear, podrás calificar los criterios</li>

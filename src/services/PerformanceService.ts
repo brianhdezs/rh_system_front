@@ -9,7 +9,9 @@ import type {
   ApiResponse,
 } from '../types/PerformanceTypes';
 
-const API_BASE_URL = 'https://hrms-gateway-production.up.railway.app/gateway/reviews';
+// URLs correctas separadas
+const EVALUATIONS_API_URL = 'https://hrms-performance-production.up.railway.app/api/Evaluations';
+const PERIODS_API_URL = 'https://hrms-performance-production.up.railway.app/api/Periods';
 
 class PerformanceService {
   private getAuthHeaders() {
@@ -20,9 +22,9 @@ class PerformanceService {
     };
   }
 
-  // Health check (sin autenticación)
+  // Health check
   async checkHealth(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/status`);
+    const response = await fetch(`${PERIODS_API_URL}/health`);
     if (!response.ok) {
       throw new Error('Error al verificar estado del servicio');
     }
@@ -31,7 +33,7 @@ class PerformanceService {
 
   // Verificar autenticación
   async verifyAuth(): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/verify`, {
+    const response = await fetch(`${PERIODS_API_URL}/test-auth`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
@@ -40,37 +42,27 @@ class PerformanceService {
     return response.json();
   }
 
+  // ===== PERÍODOS =====
+
   // Crear periodo de evaluación
   async createCycle(cycleData: EvaluationCycle): Promise<ApiResponse<number>> {
-    const response = await fetch(`${API_BASE_URL}/cycles`, {
+    const response = await fetch(PERIODS_API_URL, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(cycleData),
     });
 
     if (!response.ok) {
-      throw new Error('Error al crear periodo de evaluación');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al crear periodo de evaluación');
     }
 
     return response.json();
   }
 
-  // NUEVO: Buscar periodos de evaluación
-  async searchCycles(searchTerm: string): Promise<ApiResponse<EvaluationCycle[]>> {
-    const response = await fetch(`${API_BASE_URL}/cycles/search?q=${encodeURIComponent(searchTerm)}`, {
-      headers: this.getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al buscar periodos');
-    }
-
-    return response.json();
-  }
-
-  // NUEVO: Obtener todos los periodos
+  // Obtener todos los periodos
   async getAllCycles(): Promise<ApiResponse<EvaluationCycle[]>> {
-    const response = await fetch(`${API_BASE_URL}/cycles`, {
+    const response = await fetch(PERIODS_API_URL, {
       headers: this.getAuthHeaders(),
     });
 
@@ -81,9 +73,11 @@ class PerformanceService {
     return response.json();
   }
 
+  // ===== EVALUACIONES =====
+
   // Crear evaluación
   async createEvaluation(evaluationData: CreateEvaluationRequest): Promise<ApiResponse<{ evaluationId: number; message: string }>> {
-    const response = await fetch(`${API_BASE_URL}/assessments`, {
+    const response = await fetch(EVALUATIONS_API_URL, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(evaluationData),
@@ -100,7 +94,7 @@ class PerformanceService {
 
   // Obtener evaluaciones de un empleado
   async getEmployeeEvaluations(employeeId: number): Promise<ApiResponse<Evaluation[]>> {
-    const response = await fetch(`${API_BASE_URL}/employee/${employeeId}`, {
+    const response = await fetch(`${EVALUATIONS_API_URL}/employee/${employeeId}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -113,7 +107,7 @@ class PerformanceService {
 
   // Guardar calificación de criterio
   async saveScore(evaluationId: number, scoreData: ScoreData): Promise<ApiResponse<boolean>> {
-    const response = await fetch(`${API_BASE_URL}/ratings/${evaluationId}`, {
+    const response = await fetch(`${EVALUATIONS_API_URL}/${evaluationId}/scores`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(scoreData),
@@ -128,7 +122,7 @@ class PerformanceService {
 
   // Enviar evaluación completa
   async submitEvaluation(evaluationId: number, submissionData: SubmitEvaluationData): Promise<ApiResponse<boolean>> {
-    const response = await fetch(`${API_BASE_URL}/finalize/${evaluationId}`, {
+    const response = await fetch(`${EVALUATIONS_API_URL}/${evaluationId}/submit`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(submissionData),
@@ -143,7 +137,7 @@ class PerformanceService {
 
   // Obtener criterios de evaluación
   async getCriteria(): Promise<ApiResponse<Criteria[]>> {
-    const response = await fetch(`${API_BASE_URL}/metrics`, {
+    const response = await fetch(`${EVALUATIONS_API_URL}/criteria`, {
       headers: this.getAuthHeaders(),
     });
 
