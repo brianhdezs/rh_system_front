@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import EmployeeForm from "../../components/employees/EmployeeForm";
+import { useToast } from "../../context/ToastContext";
 import { employeeService } from "../../services/EmployeeService";
 import type { CreateEmployeeRequest } from "../../types/EmployeeTypes";
 
@@ -11,18 +12,29 @@ interface EmployeeCreatePageProps {
 export default function EmployeeCreatePage({
   onNavigateBack,
 }: EmployeeCreatePageProps) {
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: CreateEmployeeRequest) => {
     try {
       setIsLoading(true);
-      setError(null);
       await employeeService.create(data);
-      alert("Empleado creado exitosamente");
-      onNavigateBack();
+      showToast(
+        "success",
+        "¡Empleado creado exitosamente!",
+        `${data.firstName} ${data.lastName} ha sido agregado al sistema`
+      );
+
+      // Esperar un momento antes de navegar para que se vea el toast
+      setTimeout(() => {
+        onNavigateBack();
+      }, 1500);
     } catch (err: any) {
-      setError(err.message || "Error al crear empleado");
+      showToast(
+        "error",
+        "Error al crear empleado",
+        err.message || "No se pudo crear el empleado"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -45,13 +57,6 @@ export default function EmployeeCreatePage({
           </p>
         </div>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
 
       {/* Form */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

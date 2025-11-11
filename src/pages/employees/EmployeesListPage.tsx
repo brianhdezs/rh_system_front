@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Plus, Search, Loader } from "lucide-react";
 import { useEmployees } from "../../hooks/UseEmployees";
+import { useToast } from "../../context/ToastContext";
 import { employeeService } from "../../services/EmployeeService";
 import EmployeeCard from "../../components/employees/EmployeeCard";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import type { Employee } from "../../types/EmployeeTypes";
 
 interface EmployeesListPageProps {
@@ -14,26 +16,44 @@ export default function EmployeesListPage({
   onNavigateToCreate,
   onNavigateToEdit,
 }: EmployeesListPageProps) {
+  const { showToast } = useToast();
   const { employees, loading, error, refetch } = useEmployees();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(
+    null
+  );
 
-  const handleDelete = async (id: number) => {
-    if (
-      !window.confirm("¿Estás seguro de que deseas eliminar este empleado?")
-    ) {
-      return;
-    }
+  const handleDeleteClick = (employee: Employee) => {
+    setEmployeeToDelete(employee);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!employeeToDelete) return;
 
     try {
-      setDeleteLoading(id);
-      await employeeService.delete(id);
+      setDeleteLoading(employeeToDelete.id);
+      await employeeService.delete(employeeToDelete.id);
+      showToast(
+        "success",
+        "Empleado eliminado",
+        `${employeeToDelete.firstName} ${employeeToDelete.lastName} ha sido eliminado del sistema`
+      );
       refetch();
     } catch (err: any) {
-      alert(err.message || "Error al eliminar empleado");
+      showToast(
+        "error",
+        "Error al eliminar",
+        err.message || "No se pudo eliminar el empleado"
+      );
     } finally {
       setDeleteLoading(null);
+      setEmployeeToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setEmployeeToDelete(null);
   };
 
   const filteredEmployees = employees.filter(
@@ -138,11 +158,24 @@ export default function EmployeesListPage({
               <EmployeeCard
                 employee={employee}
                 onEdit={onNavigateToEdit}
-                onDelete={handleDelete}
+                onDelete={() => handleDeleteClick(employee)}
               />
             </div>
           ))}
         </div>
+      )}
+
+      {/* Confirm Delete Dialog */}
+      {employeeToDelete && (
+        <ConfirmDialog
+          title="Eliminar Empleado"
+          message={`¿Estás seguro de que deseas eliminar a ${employeeToDelete.firstName} ${employeeToDelete.lastName}? Esta acción no se puede deshacer.`}
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          type="danger"
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       )}
     </div>
   );

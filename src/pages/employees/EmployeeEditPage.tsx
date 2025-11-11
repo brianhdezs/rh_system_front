@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader } from "lucide-react";
 import EmployeeForm from "../../components/employees/EmployeeForm";
+import { useToast } from "../../context/ToastContext";
 import { employeeService } from "../../services/EmployeeService";
 import type {
   Employee,
@@ -16,6 +17,7 @@ export default function EmployeeEditPage({
   employeeId,
   onNavigateBack,
 }: EmployeeEditPageProps) {
+  const { showToast } = useToast();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +30,9 @@ export default function EmployeeEditPage({
         const data = await employeeService.getById(employeeId);
         setEmployee(data);
       } catch (err: any) {
-        setError(err.message || "Error al cargar empleado");
+        const errorMsg = err.message || "Error al cargar empleado";
+        setError(errorMsg);
+        showToast("error", "Error", errorMsg);
       } finally {
         setLoading(false);
       }
@@ -48,10 +52,22 @@ export default function EmployeeEditPage({
         id: employee.id,
         isActive: employee.isActive,
       });
-      alert("Empleado actualizado exitosamente");
-      onNavigateBack();
+      showToast(
+        "success",
+        "¡Empleado actualizado!",
+        `La información de ${data.firstName} ${data.lastName} ha sido actualizada`
+      );
+
+      // Esperar un momento antes de navegar para que se vea el toast
+      setTimeout(() => {
+        onNavigateBack();
+      }, 1500);
     } catch (err: any) {
-      setError(err.message || "Error al actualizar empleado");
+      showToast(
+        "error",
+        "Error al actualizar",
+        err.message || "No se pudo actualizar el empleado"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -97,13 +113,6 @@ export default function EmployeeEditPage({
           </p>
         </div>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
 
       {/* Form */}
       {employee && (

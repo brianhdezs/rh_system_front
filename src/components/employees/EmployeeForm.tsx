@@ -59,8 +59,18 @@ export default function EmployeeForm({
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Email inválido";
     }
-    if (!formData.phoneNumber.trim())
+
+    // Validación mejorada de teléfono
+    if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "El teléfono es requerido";
+    } else if (formData.phoneNumber.length < 10) {
+      newErrors.phoneNumber = "El teléfono debe tener 10 dígitos";
+    } else if (formData.phoneNumber.length > 10) {
+      newErrors.phoneNumber = "El teléfono no puede tener más de 10 dígitos";
+    } else if (!/^\d+$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "El teléfono solo puede contener números";
+    }
+
     if (!formData.hireDate)
       newErrors.hireDate = "La fecha de contratación es requerida";
     if (!formData.position.trim())
@@ -77,7 +87,18 @@ export default function EmployeeForm({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Validación especial para teléfono
+    if (name === "phoneNumber") {
+      // Solo permitir números y máximo 10 dígitos
+      const numericValue = value.replace(/\D/g, "");
+      if (numericValue.length <= 10) {
+        setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -127,12 +148,14 @@ export default function EmployeeForm({
         />
 
         <Input
+          type="tel"
           label="Teléfono"
           name="phoneNumber"
           value={formData.phoneNumber}
           onChange={handleChange}
           error={errors.phoneNumber}
           placeholder="5551234567"
+          maxLength={10}
         />
 
         <Input
